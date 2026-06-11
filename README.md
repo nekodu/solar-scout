@@ -11,8 +11,8 @@ internal "demand cockpit" for a solar company's operations team.
   </a>
 </p>
 
-> Self-hosted on my own homelab via a Cloudflare Tunnel (rootless Docker,
-> non-root container, capabilities dropped). The demo is branded for
+> Containerised and served via a Cloudflare Tunnel (rootless Docker, non-root
+> container, capabilities dropped). The demo is branded for
 > [1KOMMA5°](https://1komma5.com) as an example recipient; the branding is a
 > single environment variable.
 
