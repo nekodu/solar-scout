@@ -5,8 +5,13 @@ geodata, and turn each one into a costed, consent-based lead.** A concept
 built end-to-end as a portfolio piece — a homeowner-facing roof check plus an
 internal "demand cockpit" for a solar company's operations team.
 
-> **Live demo:** [1komma5.th3cyberworld.com](https://1komma5.th3cyberworld.com)
-> — self-hosted on my own homelab via a Cloudflare Tunnel (rootless Docker,
+<p align="center">
+  <a href="https://1komma5.th3cyberworld.com">
+    <img src="https://img.shields.io/badge/▶%20View%20Live%20Demo-f59e0b?style=for-the-badge&labelColor=1c1303" alt="View the live demo">
+  </a>
+</p>
+
+> Self-hosted on my own homelab via a Cloudflare Tunnel (rootless Docker,
 > non-root container, capabilities dropped). The demo is branded for
 > [1KOMMA5°](https://1komma5.com) as an example recipient; the branding is a
 > single environment variable.
