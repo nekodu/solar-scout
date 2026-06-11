@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>solar·scout Partner: Ihre Region auf einen Blick</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+<style>
+:root {
+  --bg:#0c0a07; --bg2:#13100c; --panel:#181410; --panel2:#1e1914; --line:#2c241b;
+  --txt:#f2ece2; --mut:#9d927f; --sun:#ffb524; --sun2:#ff7a1a;
+  --ok:#9fe870; --bad:#ff6b5e; --mono:'IBM Plex Mono',monospace;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--txt);
+  font:15px/1.55 'IBM Plex Sans',sans-serif; }
+h1,h2,h3 { font-family:'Fraunces',serif; font-weight:600; }
+a { color:var(--sun); }
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+header { display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+  padding:16px 4vw; border-bottom:1px solid var(--line); font-family:var(--mono);
+  font-size:14px; }
+header b { color:var(--sun); font-weight:500; }
+.modeswitch { margin-left:auto; display:flex; background:var(--panel);
+  border:1px solid var(--line); border-radius:99px; padding:3px; }
+.modeswitch a { color:var(--mut); text-decoration:none; font:500 12.5px var(--mono);
+  padding:6px 14px; border-radius:99px; transition:all .15s; }
+.modeswitch a:hover { color:var(--txt); }
+.modeswitch a.on { background:linear-gradient(160deg,var(--sun),var(--sun2));
+  color:#1c1303; font-weight:600; }
+.demo-banner { background:rgba(255,181,36,.1); border-bottom:1px solid rgba(255,181,36,.3);
+  padding:9px 4vw; font:12.5px var(--mono); color:var(--sun); }
+main { padding:26px 4vw 60px; max-width:1240px; margin:0 auto; }
+.head { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:18px; }
+.head h1 { font-size:30px; margin:6px 0; }
+.head h1 em { color:var(--sun); font-style:italic; }
+select { background:var(--panel); color:var(--txt); border:1px solid var(--line);
+  border-radius:9px; padding:9px 13px; font:13.5px var(--mono); outline:none; }
+select:focus { border-color:var(--sun); }
+.chips { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin:18px 0 26px; }
+.chip { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:14px 18px; }
+.chip b { display:block; font-size:24px; font-weight:600; font-family:'Fraunces',serif; }
+.chip b.glow { color:var(--sun); }
+.chip span { font:12px var(--mono); color:var(--mut); }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:20px 22px; margin-bottom:22px; }
+.panel h2 { font-size:19px; margin:0 0 4px; }
+.panel .sub { color:var(--mut); font-size:13.5px; margin:0 0 16px; }
+.bars { display:flex; align-items:flex-end; gap:10px; height:140px; }
+.bar { flex:1; display:flex; flex-direction:column; justify-content:flex-end;
+  align-items:center; gap:6px; height:100%; }
+.bar .fill { width:100%; border-radius:6px 6px 2px 2px; min-height:3px;
+  background:linear-gradient(180deg,var(--sun),var(--sun2)); opacity:.9; }
+.bar .lbl { font:10.5px var(--mono); color:var(--mut); }
+.bar .val { font:11.5px var(--mono); color:var(--txt); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; color:var(--mut); font-weight:500; padding:7px 10px;
+  border-bottom:1px solid var(--mut); font-family:var(--mono); font-size:11.5px; }
+td { padding:8px 10px; border-bottom:1px solid var(--line); }
+tr:hover td { background:rgba(255,181,36,.04); }
+.seg { font:11px var(--mono); padding:2px 9px; border-radius:99px; border:1px solid; }
+.seg.b2b { color:var(--sun); border-color:rgba(255,181,36,.4); }
+.seg.res { color:var(--ok); border-color:rgba(159,232,112,.35); }
+.locked { position:relative; }
+.locked .blurred { filter:blur(5px); pointer-events:none; user-select:none; }
+.locked .cta { position:absolute; inset:0; display:flex; flex-direction:column;
+  gap:10px; align-items:center; justify-content:center; text-align:center;
+  background:linear-gradient(transparent, rgba(12,10,7,.6) 30%); }
+.btn { border:none; border-radius:10px; cursor:pointer; padding:12px 26px;
+  font:600 15px 'IBM Plex Sans',sans-serif; color:#1c1303; text-decoration:none;
+  background:linear-gradient(160deg,var(--sun),var(--sun2)); }
+.plans { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px; }
+.plan { background:var(--panel2); border:1px solid var(--line); border-radius:14px;
+  padding:20px; }
+.plan.hot { border-color:var(--sun); box-shadow:0 0 40px -18px rgba(255,181,36,.5); }
+.langswitch { margin-left:10px; }
+.funnel { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.fstep { background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+  padding:14px 22px; text-align:center; min-width:130px; }
+.fstep b { display:block; font-family:'Fraunces',serif; font-size:26px; }
+.fstep.hot { border-color:var(--sun); }
+.fstep.hot b { color:var(--sun); }
+.fstep span { font:11px var(--mono); color:var(--mut); }
+.farrow { font:13px var(--mono); color:var(--mut); }
+.plan h3 { margin:0; font-size:18px; }
+.plan .price { font-family:'Fraunces',serif; font-size:30px; color:var(--sun); margin:8px 0; }
+.plan .price small { font-size:13px; color:var(--mut); font-family:'IBM Plex Sans',sans-serif; }
+.plan ul { margin:10px 0 16px; padding-left:18px; color:var(--mut); font-size:13.5px; }
+.plan ul li { margin:5px 0; }
+footer { padding:24px 4vw 36px; border-top:1px solid var(--line);
+  font:11.5px var(--mono); color:#6d6353; line-height:1.7; }
+[v-cloak] { display:none; }
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+<header><b>☀ solar·scout</b><span style="color:#5d5343">/ {{ T.portal }}</span>
+  <nav class="modeswitch">
+    <a href="/">{{ T.modeOwner }}</a><a class="on" href="/partner">{{ T.modePartner }}</a>
+  </nav>
+  <nav class="modeswitch langswitch">
+    <a :class="{on: lang==='de'}" @click.prevent="setLang('de')" href="#">DE</a><a
+      :class="{on: lang==='en'}" @click.prevent="setLang('en')" href="#">EN</a>
+  </nav></header>
+<div class="demo-banner">{{ bannerText }}</div>
+
+<main>
+  <div class="head">
+    <h1>{{ T.region }}: <em>{{ suburb || city }}</em></h1>
+    <select v-model="suburb" @change="load" style="margin-left:auto">
+      <option value="">{{ T.allOf }} {{ city }}</option>
+      <option v-for="s in suburbs" :value="s">{{ s }}</option>
+    </select>
+    <select v-model.number="weeks" @change="load">
+      <option :value="4">4 {{ T.weeks }}</option>
+      <option :value="8">8 {{ T.weeks }}</option>
+      <option :value="12">12 {{ T.weeks }}</option>
+    </select>
+  </div>
+
+  <div class="chips">
+    <div class="chip"><b class="glow">{{ kpi.searches || 0 }}</b><span>{{ T.cSearches }}</span></div>
+    <div class="chip"><b>{{ kpi.eligible || 0 }}</b><span>{{ T.cEligible }}</span></div>
+    <div class="chip"><b>{{ de(kpi.kwp) }} kWp</b><span>{{ T.cPotential }}</span></div>
+    <div class="chip"><b>{{ de(kpi.invest_eur) }} €</b><span>{{ T.cInvest }}</span></div>
+    <div class="chip"><b>{{ kpi.b2b || 0 }}</b><span>{{ T.cB2b }}</span></div>
+    <div class="chip"><b>{{ kpi.avg_payback ? de(kpi.avg_payback,1)+' '+T.yr : '–' }}</b><span>{{ T.cPayback }}</span></div>
+  </div>
+
+  <div class="panel">
+    <h2>{{ T.actH }}</h2>
+    <p class="sub">{{ T.actSub }}</p>
+    <div class="bars" v-if="weekly.length">
+      <div class="bar" v-for="w in weekly" :key="w.week">
+        <span class="val">{{ w.searches }}</span>
+        <div class="fill" :style="{height: (w.searches / maxWeek * 100) + '%'}"></div>
+        <span class="lbl">{{ T.cw }} {{ w.week.split('-')[1] }}</span>
+      </div>
+    </div>
+    <p class="sub" v-else>{{ T.actEmpty }}</p>
+  </div>
+
+  <div class="panel">
+    <h2>{{ T.leadsH }}</h2>
+    <p class="sub">{{ T.leadsSub }}</p>
+    <table v-if="leads.length">
+      <thead><tr><th>{{ T.thDate }}</th><th>{{ T.thAddr }}</th><th>{{ T.thSeg }}</th><th>{{ T.thSystem }}</th>
+        <th>{{ T.thPayback }}</th><th>{{ T.thContact }}</th></tr></thead>
+      <tbody>
+        <tr v-for="l in leads">
+          <td class="mono">{{ day(l.ts) }}</td>
+          <td>{{ shortAddr(l.address) }}</td>
+          <td><span class="seg" :class="l.segment==='b2b' ? 'b2b' : 'res'">
+            {{ l.segment==='b2b' ? T.segB2b : T.segRes }}</span></td>
+          <td class="mono">{{ de(l.kwp,1) }} kWp · {{ de(l.cost_eur) }} €</td>
+          <td class="mono">{{ de(l.payback_years,1) }} {{ T.yr }}</td>
+          <td class="mono">{{ l.email }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="sub" v-else>{{ T.leadsEmpty }}</p>
+  </div>
+
+  <div class="panel">
+    <h2>{{ T.funnelH }}</h2>
+    <p class="sub">{{ T.funnelSub }}</p>
+    <div class="funnel">
+      <div class="fstep"><b>{{ kpi.searches || 0 }}</b><span>{{ T.fSearches }}</span></div>
+      <div class="farrow">→ {{ pct(kpi.eligible, kpi.searches) }}</div>
+      <div class="fstep"><b>{{ kpi.eligible || 0 }}</b><span>{{ T.fEligible }}</span></div>
+      <div class="farrow">→ {{ pct(leads.length, kpi.eligible) }}</div>
+      <div class="fstep hot"><b>{{ leads.length }}</b><span>{{ T.fLeads }}</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>{{ T.regionsH }}</h2>
+    <p class="sub">{{ T.regionsSub }}</p>
+    <table v-if="overviewRows.length">
+      <thead><tr><th>{{ T.thRegion }}</th><th>{{ T.thSearches }}</th>
+        <th>{{ T.thEligible }}</th><th>{{ T.thLeads }}</th><th>Σ kWp</th>
+        <th>{{ T.thConversion }}</th></tr></thead>
+      <tbody>
+        <tr v-for="r in overviewRows" :key="r.city + r.suburb"
+            :style="r.suburb === suburb ? 'background:rgba(255,181,36,.06)' : ''">
+          <td>{{ r.suburb || r.city }}</td>
+          <td class="mono">{{ r.roofs }}</td>
+          <td class="mono">{{ r.eligible }}</td>
+          <td class="mono">{{ r.leads }}</td>
+          <td class="mono">{{ de(r.kwp,1) }}</td>
+          <td class="mono">{{ pct(r.leads, r.eligible) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>{{ T.intH }}</h2>
+    <p class="sub">{{ T.intSub }}</p>
+    <div class="plans">
+      <div class="plan" v-for="p in T.integrations" :key="p.name">
+        <h3>{{ p.name }}</h3>
+        <ul><li v-for="f in p.feats">{{ f }}</li></ul>
+        <a v-if="p.href" class="btn" :href="p.href" download="demand-export.csv">{{ p.cta }}</a>
+        <a v-else class="btn" style="opacity:.55;pointer-events:none" href="#">{{ p.cta }}</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>{{ T.footer }}</footer>
+</div>
+
+<script>
+const { createApp } = Vue;
+createApp({
+  data: () => ({
+    lang: localStorage.getItem('ss_lang') || 'de',
+    brandName: '',
+    city: 'Berlin', suburb: 'Pankow', weeks: 8,
+    kpi: {}, weekly: [], leads: [], outside: {}, suburbs: [], overviewRows: [],
+    I18N: {
+      de: {
+        portal: 'Demand-Cockpit', modeOwner: 'Für Eigentümer', modePartner: 'Demand-Cockpit (intern)',
+        banner: 'Internes Konzept-Cockpit, Demo-Daten. Sicht eines Standorts; National-Sicht über den Regionswähler.',
+        region: 'Ihre Region', allOf: 'ganz', weeks: 'Wochen', yr: 'J.', cw: 'KW',
+        cSearches: 'Dach-Anfragen von Eigentümern', cEligible: 'davon geeignete Dächer',
+        cPotential: 'freies Potenzial', cInvest: 'Investitionsvolumen',
+        cB2b: 'Gewerbedächer', cPayback: 'mittlere Amortisation',
+        actH: 'Aktivität pro Woche',
+        actSub: 'So viele Eigentümer haben in Ihrer Region ihr Dach prüfen lassen.',
+        actEmpty: 'Noch keine Aktivität im gewählten Zeitraum.',
+        leadsH: 'Ihre Leads',
+        leadsSub: 'Diese Eigentümer haben nach ihrer Dachanalyse aktiv um Angebote gebeten und der Weitergabe ihrer Daten zugestimmt. Vorqualifiziert, mit fertiger Anlagenplanung: bereit für Ihren Meisterbetrieb vor Ort.',
+        leadsEmpty: 'Noch keine Leads im gewählten Zeitraum. Leads entstehen, wenn Eigentümer nach der Analyse auf „Angebote erhalten" klicken.',
+        thDate: 'Datum', thAddr: 'Adresse', thSeg: 'Segment', thSystem: 'Anlage',
+        thPayback: 'Amortisation', thContact: 'Kontakt', segB2b: 'Gewerbe', segRes: 'privat',
+        funnelH: 'Funnel', funnelSub: 'Vom ersten Dach-Check bis zur Angebotsanfrage.',
+        fSearches: 'Dach-Checks', fEligible: 'geeignete Dächer', fLeads: 'Angebotsanfragen',
+        regionsH: 'Regionen im Vergleich',
+        regionsSub: 'Wo die Nachfrage wächst und wo Marketing oder ein neuer Standort lohnt. Die eigene Region ist hervorgehoben.',
+        thRegion: 'Region', thSearches: 'Checks', thEligible: 'geeignet',
+        thLeads: 'Anfragen', thConversion: 'Conversion',
+        intH: 'Anbindung an unsere Systeme',
+        intSub: 'Konzept: wie das Cockpit in die bestehende Landschaft greift.',
+        integrations: [
+          { name: 'CRM', cta: 'CSV-Export', href: '/api/market/export.csv',
+            feats: ['Anfragen mit fertiger Anlagenplanung','automatisches Routing zum nächsten Standort','Gebiets-Aggregate für Kampagnen'] },
+          { name: 'Heartbeat', cta: 'Konzept',
+            feats: ['jedes neu belegte Dach: ein Heartbeat-Kandidat','Anlagendaten (kWp, Ausrichtung) liegen schon vor','Übergabe bei Inbetriebnahme'] },
+          { name: 'Expansion', cta: 'Konzept',
+            feats: ['Nachfrage ohne Standort in der Nähe: Lückenkarte','B2B-Pipeline für das Gewerbegeschäft','Basis: amtliche Geodaten, keine Lizenzkosten'] },
+        ],
+        footer: 'Alle Kennzahlen sind unverbindliche, automatisch berechnete Schätzwerte. Leads enthalten nur Daten von Eigentümern, die der Weitergabe ausdrücklich zugestimmt haben; alle übrigen Anfragen fließen anonym in die Gebietsstatistik ein. Widerruft ein Eigentümer seine Einwilligung, wird der Lead entfernt. Keine Rechts- oder Steuerberatung.',
+      },
+      en: {
+        portal: 'Demand cockpit', modeOwner: 'For homeowners', modePartner: 'Demand cockpit (internal)',
+        banner: 'Internal concept cockpit, demo data. One branch view; switch the region selector for the national view.',
+        region: 'Your region', allOf: 'all of', weeks: 'weeks', yr: 'yrs', cw: 'wk',
+        cSearches: 'roof checks by owners', cEligible: 'of which suitable roofs',
+        cPotential: 'untapped potential', cInvest: 'investment volume',
+        cB2b: 'commercial roofs', cPayback: 'average payback',
+        actH: 'Activity per week',
+        actSub: 'How many owners had their roof checked in your region.',
+        actEmpty: 'No activity in the selected period yet.',
+        leadsH: 'Your leads',
+        leadsSub: 'These owners actively asked for quotes after their roof analysis and consented to sharing their data. Pre-qualified, with a ready system plan: ready for your local installation team.',
+        leadsEmpty: 'No leads in the selected period yet. Leads appear when owners click "Get quotes" after their analysis.',
+        thDate: 'Date', thAddr: 'Address', thSeg: 'Segment', thSystem: 'System',
+        thPayback: 'Payback', thContact: 'Contact', segB2b: 'business', segRes: 'private',
+        funnelH: 'Funnel', funnelSub: 'From the first roof check to a quote request.',
+        fSearches: 'roof checks', fEligible: 'suitable roofs', fLeads: 'quote requests',
+        regionsH: 'Regions compared',
+        regionsSub: 'Where demand is growing and where marketing or a new branch pays off. Your own region is highlighted.',
+        thRegion: 'Region', thSearches: 'Checks', thEligible: 'suitable',
+        thLeads: 'Requests', thConversion: 'Conversion',
+        intH: 'Hooks into our systems',
+        intSub: 'Concept: how the cockpit plugs into the existing landscape.',
+        integrations: [
+          { name: 'CRM', cta: 'CSV export', href: '/api/market/export.csv',
+            feats: ['requests with a ready system plan','automatic routing to the nearest branch','area aggregates for campaigns'] },
+          { name: 'Heartbeat', cta: 'Concept',
+            feats: ['every newly installed roof: a Heartbeat candidate','system data (kWp, orientation) already known','handover at commissioning'] },
+          { name: 'Expansion', cta: 'Concept',
+            feats: ['demand with no branch nearby: gap map','B2B pipeline for the commercial business','built on official open geodata, no licence costs'] },
+        ],
+        footer: 'All figures are non-binding automated estimates. Leads contain only data of owners who explicitly consented to sharing; all other requests feed the area statistics anonymously. If an owner revokes consent, the lead is removed. No legal or tax advice.',
+      },
+    },
+  }),
+  computed: {
+    T() { return this.I18N[this.lang]; },
+    bannerText() {
+      const n = this.brandName, r = this.suburb || this.city;
+      if (!n) return this.T.banner;
+      return this.lang === 'de'
+        ? `Internes Konzept-Cockpit für ${n} (Demo-Daten): Sicht des Standorts ${r}. Für die National-Sicht den Regionswähler auf „ganz Berlin" stellen.`
+        : `Internal concept cockpit for ${n} (demo data): the ${r} branch view. Set the region selector to all of Berlin for the national view.`;
+    },
+    maxWeek() { return Math.max(1, ...this.weekly.map(w => w.searches)); },
+  },
+  methods: {
+    de(n, d = 0) { return Number(n || 0).toLocaleString(
+      this.lang === 'de' ? 'de-DE' : 'en-US', { maximumFractionDigits: d }); },
+    day(ts) { return new Date(ts * 1000).toLocaleDateString(
+      this.lang === 'de' ? 'de-DE' : 'en-GB', { day: '2-digit', month: '2-digit' }); },
+    setLang(l) { this.lang = l; localStorage.setItem('ss_lang', l); },
+    pct(a, b) { return b ? Math.round(100 * (a || 0) / b) + ' %' : '–'; },
+    shortAddr(a) { return (a || '').split(',').slice(0, 2).join(', '); },
+    async load() {
+      const q = `city=${encodeURIComponent(this.city)}&suburb=${encodeURIComponent(this.suburb)}&weeks=${this.weeks}`;
+      const d = await (await fetch(`/api/partner/summary?${q}`)).json();
+      this.kpi = d.kpi || {}; this.weekly = d.weekly || [];
+      this.leads = d.leads || []; this.outside = d.outside || {};
+    },
+    async loadSuburbs() {
+      try {
+        const rows = await (await fetch('/api/market/overview')).json();
+        const agg = {};
+        for (const r of rows.filter(r => r.city === this.city)) {
+          const k = r.suburb || r.city;
+          const a = agg[k] = agg[k] || { city: r.city, suburb: r.suburb,
+            roofs: 0, eligible: 0, kwp: 0, leads: 0 };
+          a.roofs += r.roofs; a.eligible += r.eligible; a.kwp += r.kwp || 0;
+          a.leads = Math.max(a.leads, r.leads || 0);  // lead count repeats per row
+        }
+        this.overviewRows = Object.values(agg).sort((x, y) => y.kwp - x.kwp);
+        this.suburbs = [...new Set(rows.filter(r => r.city === this.city && r.suburb)
+          .map(r => r.suburb))].sort();
+        if (!this.suburbs.includes(this.suburb) && this.suburbs.length)
+          this.suburb = this.suburbs[0];
+      } catch { this.suburbs = []; }
+    },
+  },
+  async mounted() {
+    try {
+      const b = await (await fetch('/api/branding')).json();
+      this.brandName = b.name || '';
+      if (b.city) this.city = b.city;
+      if (b.suburb) this.suburb = b.suburb;
+    } catch {}
+    await this.loadSuburbs(); await this.load();
+  },
+}).mount('#app');
+</script>
+</body>
+</html>

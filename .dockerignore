@@ -1,0 +1,11 @@
+.venv
+__pycache__
+**/__pycache__
+docs
+*.md
+market.db
+private
+out*
+.dockerignore
+docker-compose.yml
+entrypoint.sh.bak

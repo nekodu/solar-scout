@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>solar·scout: Was kann Ihr Dach?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+<style>
+:root {
+  --bg:#0c0a07; --bg2:#13100c; --panel:#181410; --panel2:#1e1914; --line:#2c241b;
+  --txt:#f2ece2; --mut:#9d927f; --sun:#ffb524; --sun2:#ff7a1a;
+  --ok:#9fe870; --bad:#ff6b5e; --mono:'IBM Plex Mono',monospace;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--txt);
+  font:15px/1.55 'IBM Plex Sans',sans-serif; overflow-x:hidden; }
+/* film grain */
+body::after { content:''; position:fixed; inset:0; pointer-events:none; opacity:.05; z-index:99;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+h1,h2,h3,.serif { font-family:'Fraunces',serif; font-weight:600; letter-spacing:.2px; }
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+a { color:var(--sun); }
+
+/* ---------- hero ---------- */
+#hero { position:relative; min-height:78vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:60px 20px 90px;
+  overflow:hidden; }
+#hero .horizon { position:absolute; left:50%; bottom:-46vh; transform:translateX(-50%);
+  width:160vw; height:80vh; border-radius:50% 50% 0 0; pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,181,36,.32) 0%,
+    rgba(255,122,26,.13) 34%, transparent 68%);
+  animation:breathe 9s ease-in-out infinite; }
+#hero .horizon::before { content:''; position:absolute; inset:-1px;
+  border-top:1px solid rgba(255,181,36,.45); border-radius:inherit;
+  filter:blur(.5px); }
+@keyframes breathe { 50% { opacity:.78; } }
+.wordmark { position:fixed; top:0; left:0; right:0; z-index:10; display:flex;
+  align-items:center; gap:8px; padding:16px 28px; font-family:var(--mono); font-size:14px;
+  background:linear-gradient(rgba(12,10,7,.92), rgba(12,10,7,0)); }
+.wordmark b { color:var(--sun); font-weight:500; }
+.modeswitch { margin-left:auto; display:flex; background:var(--panel);
+  border:1px solid var(--line); border-radius:99px; padding:3px; }
+.modeswitch a { color:var(--mut); text-decoration:none; font:500 12.5px var(--mono);
+  padding:6px 14px; border-radius:99px; transition:all .15s; }
+.modeswitch a:hover { color:var(--txt); }
+.modeswitch a.on { background:linear-gradient(160deg,var(--sun),var(--sun2));
+  color:#1c1303; font-weight:600; }
+.langswitch { margin-left:10px; }
+#hero h1 { font-size:clamp(38px,6.4vw,76px); margin:0 0 10px; font-weight:700;
+  animation:rise .8s ease both; }
+#hero h1 em { font-style:italic; color:var(--sun);
+  text-shadow:0 0 38px rgba(255,160,30,.35); }
+#hero .sub { color:var(--mut); max-width:560px; margin:0 auto 38px; font-size:16.5px;
+  animation:rise .8s .12s ease both; }
+@keyframes rise { from { opacity:0; transform:translateY(18px); } }
+#searchbox { display:flex; width:min(680px,92vw); animation:rise .8s .22s ease both;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:6px; gap:6px; transition:border-color .2s, box-shadow .25s; }
+#searchbox:focus-within { border-color:var(--sun);
+  box-shadow:0 0 0 1px var(--sun), 0 12px 50px -12px rgba(255,160,30,.35); }
+#searchbox input { flex:1; background:none; border:none; outline:none; color:var(--txt);
+  font:16.5px var(--mono); padding:13px 16px; min-width:0; }
+#searchbox input::placeholder { color:#6d6353; }
+#searchbox button { border:none; border-radius:9px; cursor:pointer;
+  font:600 15px 'IBM Plex Sans',sans-serif; padding:0 26px; color:#1c1303;
+  background:linear-gradient(160deg,var(--sun),var(--sun2));
+  transition:filter .15s, transform .1s; }
+#searchbox button:hover { filter:brightness(1.1); }
+#searchbox button:active { transform:scale(.97); }
+#searchbox button:disabled { filter:grayscale(.7) brightness(.7); cursor:wait; }
+.hint { margin-top:14px; font:12.5px var(--mono); color:#6d6353;
+  animation:rise .8s .3s ease both; }
+.sugwrap { position:relative; width:min(680px,92vw); }
+.sugwrap #searchbox { width:100%; }
+ul.suggest { position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:8;
+  margin:0; padding:6px; list-style:none; background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; text-align:left;
+  box-shadow:0 18px 50px -18px rgba(0,0,0,.85); }
+ul.suggest li { display:flex; gap:10px; align-items:baseline; padding:9px 12px;
+  border-radius:8px; cursor:pointer; font-size:14.5px; }
+ul.suggest li.act, ul.suggest li:hover { background:rgba(255,181,36,.09); }
+ul.suggest .ico { color:var(--sun); font-size:13px; width:14px; }
+ul.suggest b { font-weight:600; }
+ul.suggest .det { color:var(--mut); font:12px var(--mono); }
+.forteam { font:12.5px var(--mono); color:var(--sun); letter-spacing:.6px;
+  text-transform:uppercase; margin-bottom:14px; animation:rise .8s ease both;
+  border:1px solid rgba(255,181,36,.35); border-radius:99px; padding:6px 16px;
+  background:rgba(255,181,36,.07); }
+.forteam b { font-weight:600; }
+.examples { display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+  margin-top:10px; animation:rise .8s .36s ease both; max-width:min(680px,92vw); }
+.examples button { background:var(--panel); border:1px solid var(--line);
+  color:var(--mut); border-radius:99px; padding:8px 16px; cursor:pointer;
+  font:13px var(--mono); transition:all .15s; }
+.examples button:hover { color:var(--txt); border-color:var(--sun); }
+.examples button:disabled { opacity:.5; cursor:wait; }
+
+/* ---------- analysis instrument log ---------- */
+#log { width:min(680px,92vw); margin-top:26px; text-align:left;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:18px 22px; position:relative; overflow:hidden; }
+#log .scan { position:absolute; top:0; bottom:0; width:90px; pointer-events:none;
+  background:linear-gradient(90deg, transparent, rgba(255,181,36,.07), transparent);
+  animation:scan 1.6s linear infinite; }
+@keyframes scan { from { left:-90px; } to { left:100%; } }
+#log .line { font:13.5px var(--mono); padding:4px 0; color:var(--mut);
+  display:flex; gap:10px; align-items:baseline; animation:rise .4s ease both; }
+#log .line .tick { color:var(--ok); }
+#log .line.cur { color:var(--txt); }
+#log .line.cur .tick { color:var(--sun); animation:blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity:.2; } }
+#log .line.err { color:var(--bad); }
+
+/* ---------- datasheet result ---------- */
+#sheet { width:min(1060px,94vw); margin:-40px auto 70px; position:relative; z-index:2;
+  background:var(--panel2); border:1px solid var(--line); border-radius:18px;
+  display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  overflow:hidden; animation:rise .6s ease both;
+  box-shadow:0 40px 80px -40px rgba(0,0,0,.8); }
+#sheet .imgwrap { position:relative; background:#000; min-height:380px; }
+#sheet .imgwrap img, #sheet .imgwrap iframe { width:100%; height:100%; border:0;
+  object-fit:cover; display:block; position:absolute; inset:0; }
+#sheet .corner { position:absolute; width:18px; height:18px; z-index:2;
+  border:1.5px solid var(--sun); opacity:.9; }
+#sheet .c1 { top:10px; left:10px; border-right:0; border-bottom:0; }
+#sheet .c2 { top:10px; right:10px; border-left:0; border-bottom:0; }
+#sheet .c3 { bottom:10px; left:10px; border-right:0; border-top:0; }
+#sheet .c4 { bottom:10px; right:10px; border-left:0; border-top:0; }
+#sheet .body { padding:30px 34px 26px; }
+.badge { display:inline-block; font:500 12px var(--mono); padding:3px 12px;
+  border-radius:99px; border:1px solid; }
+.badge.ok { color:var(--ok); border-color:rgba(159,232,112,.4); background:rgba(159,232,112,.07); }
+.badge.has { color:var(--bad); border-color:rgba(255,107,94,.4); background:rgba(255,107,94,.07); }
+.badge.b2b { color:var(--sun); border-color:rgba(255,181,36,.4); background:rgba(255,181,36,.07); margin-left:8px; }
+#sheet h2 { font-size:24px; margin:14px 0 4px; }
+#sheet .addr { color:var(--mut); font:13px var(--mono); margin-bottom:18px; }
+.bignum { font-family:'Fraunces',serif; font-size:46px; font-weight:700; color:var(--sun);
+  line-height:1.1; margin:6px 0 2px; }
+.bignum small { font-size:19px; color:var(--mut); font-weight:400; }
+.metrics { width:100%; border-collapse:collapse; margin-top:16px; }
+.metrics td { padding:7.5px 2px; border-bottom:1px solid var(--line); font-size:14px;
+  color:var(--mut); }
+.metrics td:last-child { text-align:right; color:var(--txt); font-family:var(--mono);
+  font-size:13.5px; }
+.tabs { display:flex; gap:8px; margin-top:20px; }
+.tabs button, .ghost { background:none; border:1px solid var(--line); color:var(--mut);
+  border-radius:9px; padding:8px 16px; font:500 13.5px 'IBM Plex Sans',sans-serif;
+  cursor:pointer; text-decoration:none; transition:all .15s; }
+.tabs button:hover, .ghost:hover { color:var(--txt); border-color:var(--mut); }
+.tabs button.act { color:var(--sun); border-color:var(--sun);
+  background:rgba(255,181,36,.08); }
+
+/* ---------- archive ---------- */
+#archive, #market { padding:30px 4vw 80px; border-top:1px solid var(--line);
+  background:linear-gradient(var(--bg2), var(--bg)); }
+#market { padding-bottom:30px; }
+#archive .head, #market .head { display:flex; flex-wrap:wrap; gap:14px;
+  align-items:baseline; margin-bottom:6px; }
+#archive h2, #market h2 { font-size:30px; margin:18px 0 8px; }
+#archive h2 em, #market h2 em { color:var(--sun); font-style:italic; }
+.chips { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 22px; }
+.chip { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:8px 16px; font:12px var(--mono); color:var(--mut); }
+.chip b { display:block; color:var(--txt); font-size:16px; font-weight:500; }
+.chip b.glow { color:var(--sun); }
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+select,input.f { background:var(--panel); color:var(--txt); border:1px solid var(--line);
+  border-radius:9px; padding:9px 13px; font:13.5px var(--mono); outline:none; }
+select:focus,input.f:focus { border-color:var(--sun); }
+input.f { flex:1; min-width:200px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:16px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; cursor:pointer; transition:transform .18s, border-color .18s; }
+.card:hover { transform:translateY(-4px); border-color:var(--sun); }
+.card img { width:100%; aspect-ratio:1.2; object-fit:cover; display:block; background:#000; }
+.card .noimg { width:100%; aspect-ratio:1.2; display:grid; place-items:center;
+  color:#5d5343; font:12px var(--mono); }
+.card .pad { padding:13px 15px 15px; }
+.card h3 { margin:8px 0 3px; font-size:15.5px; font-weight:600;
+  font-family:'IBM Plex Sans',sans-serif; }
+.card .kv { font:12px var(--mono); color:var(--mut); line-height:1.7; }
+.card .kv b { color:var(--txt); font-weight:500; }
+table.mkt { border-collapse:collapse; width:100%; font-size:12.5px; margin:10px 0 20px; }
+table.mkt th { text-align:left; color:var(--mut); font-weight:500; padding:6px 10px;
+  border-bottom:1px solid var(--mut); }
+table.mkt td { padding:6px 10px; border-bottom:1px solid var(--line); }
+table.mkt tr:hover td { background:rgba(255,181,36,.04); }
+.leadbox { margin-top:18px; background:rgba(255,181,36,.06);
+  border:1px solid rgba(255,181,36,.25); border-radius:12px; padding:16px 18px; }
+.leadbox h3 { margin:0 0 6px; font-size:17px; }
+.leadbox p { margin:4px 0 10px; font-size:13.5px; color:var(--mut); }
+.leadbox form { display:flex; gap:8px; }
+.leadbox input { flex:1; background:var(--panel); color:var(--txt); min-width:0;
+  border:1px solid var(--line); border-radius:9px; padding:10px 13px; font:14px var(--mono); }
+.leadbox input:focus { border-color:var(--sun); outline:none; }
+.leadbox button { border:none; border-radius:9px; cursor:pointer; padding:0 18px;
+  font:600 14px 'IBM Plex Sans',sans-serif; color:#1c1303;
+  background:linear-gradient(160deg,var(--sun),var(--sun2)); }
+.leadbox.demo-off input, .leadbox.demo-off button { opacity:.45; cursor:not-allowed; }
+.leadbox.demo-off { border-style:dashed; }
+.fineprint { font:11px var(--mono); color:#6d6353; line-height:1.6; margin-top:16px;
+  border-top:1px solid var(--line); padding-top:10px; }
+footer.site { padding:26px 4vw 36px; border-top:1px solid var(--line);
+  font:11.5px var(--mono); color:#6d6353; line-height:1.7; }
+
+/* ---------- detail overlay ---------- */
+#overlay { position:fixed; inset:0; background:rgba(8,6,4,.78); backdrop-filter:blur(5px);
+  z-index:20; }
+#detail { position:absolute; inset:4vh 4vw; background:var(--panel2);
+  border:1px solid var(--line); border-radius:18px; display:flex; flex-direction:column;
+  overflow:hidden; animation:rise .25s ease both; }
+#dhead { display:flex; align-items:center; gap:10px; padding:14px 20px;
+  border-bottom:1px solid var(--line); }
+#dhead h2 { font-size:17px; margin:0; flex:1; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; }
+#dhead .x { font-size:20px; background:none; border:none; color:var(--mut);
+  cursor:pointer; }
+#dbody { flex:1; display:flex; min-height:0; }
+#dmain { flex:1; min-width:0; background:#000; position:relative; }
+#dmain iframe, #dmain img { position:absolute; inset:0; width:100%; height:100%;
+  border:0; object-fit:contain; }
+#dmain .noimg { height:100%; display:grid; place-items:center; color:#5d5343;
+  font:13px var(--mono); }
+#dside { width:330px; padding:20px 22px; overflow-y:auto; border-left:1px solid var(--line); }
+@media (max-width:900px) {
+  #sheet { grid-template-columns:1fr; }
+  #dbody { flex-direction:column; } #dside { width:auto; border-left:none; }
+}
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+
+<div class="wordmark"><b>☀ solar·scout</b><span style="color:#5d5343">/ {{ T.tagline }}</span>
+  <nav class="modeswitch">
+    <a class="on" href="/">{{ T.modeOwner }}</a><a href="/partner">{{ T.modePartner }}</a>
+  </nav>
+  <nav class="modeswitch langswitch">
+    <a :class="{on: lang==='de'}" @click.prevent="setLang('de')" href="#">DE</a><a
+      :class="{on: lang==='en'}" @click.prevent="setLang('en')" href="#">EN</a>
+  </nav></div>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="horizon"></div>
+  <div v-if="brand.name" class="forteam">{{ T.builtFor }} <b>{{ brand.name }}</b> ✦</div>
+  <h1>{{ T.h1a }} <em>{{ T.h1b }}</em></h1>
+  <p class="sub">{{ T.sub }}</p>
+  <div class="sugwrap">
+  <form id="searchbox" @submit.prevent="submitSearch">
+    <input v-model="address" :disabled="analyzing" autocomplete="off"
+      :placeholder="T.searchPh"
+      @input="onAddrInput" @keydown.down.prevent="moveSug(1)"
+      @keydown.up.prevent="moveSug(-1)" @keydown.esc="suggs=[]"
+      @blur="blurSug" @focus="onAddrInput">
+    <button :disabled="analyzing || !address.trim()">
+      {{ analyzing ? '…' : T.btnCheck }}</button>
+  </form>
+  <ul class="suggest" v-if="suggs.length && !analyzing">
+    <li v-for="(s,i) in suggs" :key="s.value" :class="{act: i===sugIdx}"
+        @mousedown.prevent="pickSug(s)">
+      <span class="ico">{{ s.address ? '⌂' : '◌' }}</span>
+      <b>{{ s.label }}</b><span class="det">{{ s.detail }}</span>
+    </li>
+  </ul>
+  </div>
+  <div class="hint">{{ T.hint }}</div>
+  <div class="examples">
+    <button v-for="ex in examples" :key="ex.addr" :disabled="analyzing"
+      @click="runExample(ex)">{{ ex.icon }} {{ ex[lang] }}</button>
+  </div>
+
+  <div id="log" v-if="analyzing || logErr">
+    <div class="scan" v-if="analyzing"></div>
+    <div v-for="(s,i) in T.stages.slice(0, stage+1)" :key="i"
+         class="line" :class="{cur: i===stage && analyzing}">
+      <span class="tick">{{ i < stage || !analyzing ? '✓' : '▸' }}</span> {{ s }}
+      <span v-if="i===stage && analyzing" style="margin-left:auto" class="mono">{{ secs }}s</span>
+    </div>
+    <div v-if="logErr" class="line err"><span>✕</span> {{ logErr }}</div>
+  </div>
+</section>
+
+<!-- ============ RESULT DATENBLATT ============ -->
+<section id="sheet" v-if="sheet">
+  <div class="imgwrap">
+    <div class="corner c1"></div><div class="corner c2"></div>
+    <div class="corner c3"></div><div class="corner c4"></div>
+    <iframe v-if="sheetTab==='3d' && sheet.viewer" :src="privateUrl(sheet.viewer)"></iframe>
+    <img v-else-if="sheet.image" :src="privateUrl(sheet.image)">
+    <div v-else class="noimg" style="position:absolute;inset:0;display:grid;place-items:center;color:#5d5343">{{ T.noimg }}</div>
+  </div>
+  <div class="body">
+    <span class="badge" :class="sheet.status==='eligible' ? 'ok' : 'has'">
+      {{ T.status[sheet.status] || sheet.status }}</span>
+    <span v-if="sheet.segment==='b2b'" class="badge b2b">B2B</span>
+    <h2>{{ sheet.business_name || shortAddr(sheet.address) }}</h2>
+    <div class="addr mono">{{ sheet.address }}</div>
+    <div v-if="note" class="addr mono" style="color:var(--sun)">⚠ {{ lang==='de' ? note : T.fallbackNote }}</div>
+    <div v-if="isExample" class="addr mono" style="color:#6d6353">{{ T.exampleNote }}</div>
+    <div class="addr mono" style="color:#6d6353">🔒 {{ T.privacyNote }}</div>
+    <template v-if="sheet.status==='eligible'">
+      <div style="color:var(--mut);font-size:13px">{{ T.payback }}
+        <span class="badge" style="color:var(--sun);border-color:rgba(255,181,36,.4);margin-left:6px">{{ T.estBadge }}</span></div>
+      <div class="bignum">≈ {{ de(sheet.payback_years,1) }} <small>{{ T.years }}</small></div>
+      <table class="metrics"><tbody>
+        <tr><td>{{ T.mSystem }}</td><td>{{ de(sheet.proposed_panels) }} {{ T.modules }} · {{ de(sheet.proposed_kwp,1) }} kWp</td></tr>
+        <tr><td>{{ T.mArea }}</td><td>{{ de(sheet.proposed_panel_area_m2) }} m²</td></tr>
+        <tr><td>{{ T.mOrient }}</td><td>{{ sheet.orientation }} · {{ de(sheet.specific_yield) }} kWh/kWp</td></tr>
+        <tr><td>{{ T.mKwh }}</td><td>{{ de(sheet.estimated_annual_kwh) }} kWh</td></tr>
+        <tr><td>{{ T.mInvest }}</td><td>{{ de(sheet.estimated_cost_eur) }} €</td></tr>
+        <tr><td>{{ T.mBenefit }}</td><td>≈ {{ de(sheet.annual_benefit_eur) }} €</td></tr>
+        <tr><td>{{ T.mCo2 }}</td><td>≈ {{ de(sheet.co2_t_per_year,1) }} {{ T.co2unit }}</td></tr>
+      </tbody></table>
+      <div class="leadbox demo-off" v-if="!isExample">
+        <h3>{{ T.leadH }}</h3>
+        <p>{{ T.leadP }}</p>
+        <form @submit.prevent>
+          <input type="email" :placeholder="T.leadPh" disabled>
+          <button disabled>{{ T.leadBtn }}</button>
+        </form>
+        <p class="fineprint" style="border:none;padding-top:6px;margin-top:8px">
+          {{ T.leadDemoNote }}</p>
+      </div>
+    </template>
+    <template v-else-if="sheet.status==='has_panels'">
+      <p style="color:var(--mut)">{{ T.hasPanels1 }} {{ de(sheet.existing_panel_coverage*100) }} {{ T.hasPanels2 }}</p>
+    </template>
+    <template v-else-if="sheet.status==='obstructed'">
+      <p style="color:var(--mut)">{{ T.obstructedMsg }}</p>
+    </template>
+    <div class="tabs">
+      <button v-if="sheet.viewer" :class="{act:sheetTab==='3d'}" @click="sheetTab='3d'">{{ T.t3d }}</button>
+      <button :class="{act:sheetTab==='foto'}" @click="sheetTab='foto'">{{ T.tFoto }}</button>
+      <a v-if="letterRel && !isExample" class="ghost" :href="privateUrl(letterRel)" target="_blank">{{ T.tLetter }} ↗</a>
+      <a v-if="sheet.osm_url && !isExample" class="ghost" :href="sheet.osm_url" target="_blank">OSM ↗</a>
+    </div>
+    <p class="fineprint">{{ T.fineprint }}</p>
+  </div>
+</section>
+
+<!-- ============ ARCHIVE ============ -->
+<section id="archive" v-if="runs.length">
+  <div class="head">
+    <h2>Gebiets<em>scans</em></h2>
+    <select v-model="run" @change="loadRun" style="margin-left:auto">
+      <option v-for="r in runs" :value="r.name">{{ r.name }} ({{ r.roofs }})</option>
+    </select>
+  </div>
+  <div class="chips" v-if="rows.length">
+    <div class="chip"><b class="glow">{{ stats.n }}</b>geeignete Dächer</div>
+    <div class="chip"><b>{{ de(stats.kwp) }} kWp</b>Potenzial</div>
+    <div class="chip"><b>{{ de(stats.cost) }} €</b>Investition</div>
+    <div class="chip"><b>{{ de(stats.kwh) }} kWh/a</b>Stromertrag</div>
+  </div>
+  <div class="toolbar">
+    <input class="f" v-model="q" placeholder="Adresse / Name suchen…">
+    <select v-model="status">
+      <option value="">alle Status</option><option value="eligible">geeignet</option>
+      <option value="has_panels">belegt</option></select>
+    <select v-model="segment">
+      <option value="">alle Segmente</option><option value="b2b">B2B</option>
+      <option value="residential">privat</option></select>
+    <select v-model="sortKey">
+      <option value="proposed_kwp">Sortierung: kWp</option>
+      <option value="payback_years">Amortisation</option>
+      <option value="estimated_cost_eur">Preis</option>
+      <option value="estimated_annual_kwh">Ertrag</option>
+      <option value="footprint_m2">Dachfläche</option></select>
+  </div>
+  <div class="grid">
+    <div class="card" v-for="r in filtered" :key="r.osm_id" @click="openDetail(r)">
+      <img v-if="r.image" loading="lazy" :src="fileUrl(run, r.image)">
+      <div v-else class="noimg">kein Bild</div>
+      <div class="pad">
+        <span class="badge" :class="r.status==='eligible' ? 'ok' : 'has'">
+          {{ r.status==='eligible' ? 'geeignet' : r.status==='has_panels' ? 'belegt'
+             : r.status==='obstructed' ? 'verbaut' : 'zu klein' }}</span>
+        <span v-if="r.segment==='b2b'" class="badge b2b">B2B</span>
+        <h3>{{ r.business_name || shortAddr(r.address) }}</h3>
+        <div class="kv" v-if="r.status==='eligible'">
+          <b>{{ de(r.proposed_kwp,1) }} kWp</b> · {{ de(r.proposed_panel_area_m2) }} m² ·
+          {{ de(r.estimated_cost_eur) }} €<br>
+          Amortisation <b>{{ de(r.payback_years,1) }} a</b> ·
+          {{ de(r.estimated_annual_kwh) }} kWh/a</div>
+        <div class="kv" v-else>Modulbelegung ≈ {{ de(r.existing_panel_coverage*100) }} %</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site">{{ T.footer }}</footer>
+
+<!-- ============ DETAIL OVERLAY ============ -->
+<div id="overlay" v-if="detail" @click.self="detail=null" @keydown.esc="detail=null">
+  <div id="detail">
+    <div id="dhead">
+      <h2>{{ detail.business_name && detail.business_name!==detail.address
+            ? detail.business_name+', '+detail.address : detail.address }}</h2>
+      <div class="tabs" style="margin:0">
+        <button v-if="detail.viewer" :class="{act:dtab==='3d'}" @click="dtab='3d'">3D</button>
+        <button :class="{act:dtab==='foto'}" @click="dtab='foto'">Luftbild</button>
+        <button v-if="detail.letter" :class="{act:dtab==='brief'}" @click="dtab='brief'">Brief</button>
+      </div>
+      <button class="x" @click="detail=null">✕</button>
+    </div>
+    <div id="dbody">
+      <div id="dmain">
+        <iframe v-if="dtab==='3d' && detail.viewer" :src="fileUrl(run, detail.viewer)"></iframe>
+        <iframe v-else-if="dtab==='brief' && detail.letter" :src="fileUrl(run, detail.letter)"
+          style="background:#fff"></iframe>
+        <img v-else-if="detail.image" :src="fileUrl(run, detail.image)">
+        <div v-else class="noimg">für dieses Dach nicht erzeugt</div>
+      </div>
+      <aside id="dside">
+        <div v-if="detail.status==='eligible'">
+          <div style="color:var(--mut);font-size:12px">Amortisation</div>
+          <div class="bignum" style="font-size:34px">≈ {{ de(detail.payback_years,1) }}
+            <small>Jahre</small></div>
+        </div>
+        <table class="metrics"><tbody>
+          <tr v-for="[k,v] in detailRows"><td>{{ k }}</td><td v-html="v"></td></tr>
+        </tbody></table>
+      </aside>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+const { createApp } = Vue;
+createApp({
+  data: () => ({
+    runs: [], run: '', rows: [],
+    q: '', status: '', segment: '', sortKey: 'proposed_kwp',
+    lang: localStorage.getItem('ss_lang') || 'de',
+    address: '', analyzing: false, stage: 0, secs: 0, logErr: '', note: '',
+    suggs: [], sugIdx: -1, sugTimer: null,
+    isExample: false,
+    brand: { name: '', city: 'Berlin', suburb: 'Pankow' },
+    examples: [
+      { icon: '⌂', de: 'Wohnhaus in Berlin', en: 'Family home in Berlin', addr: 'Str. vor Schönholz 15, 13158 Berlin' },
+      { icon: '⚙', de: 'Gewerbedach in Berlin', en: 'Commercial roof in Berlin', addr: 'Wiltbergstraße 3, 13125 Berlin' },
+      { icon: '⌂', de: 'Einfamilienhaus in München', en: 'Family home in Munich', addr: 'Gotzmannstraße 25, 81247 München' },
+      { icon: '⚙', de: 'Logistikhalle in München', en: 'Logistics hall in Munich', addr: 'Heidemannstraße 166, 80939 München' },
+    ],
+    I18N: {
+      de: {
+        tagline: 'Dachanalyse in Echtzeit', modeOwner: 'Für Eigentümer', modePartner: 'Demand-Cockpit (intern)',
+        h1a: 'Was kann', h1b: 'Ihr Dach?',
+        sub: 'Geben Sie einfach Ihre Adresse ein. Wir schauen uns Ihr Dach auf dem amtlichen Luftbild an, planen die passende Solaranlage und rechnen aus, was sie bringt. Kostenlos, unverbindlich, in unter einer Minute.',
+        searchPh: 'z. B. Str. vor Schönholz 14, 13158 Berlin', btnCheck: 'Dach prüfen',
+        hint: 'Oder direkt ausprobieren:', noimg: 'kein Bild',
+        builtFor: 'Gebaut für das Team von',
+        stages: ['Adresse wird gesucht…','Gebäude wird geladen…','Luftbild wird geholt…','Dach wird geprüft…','Dachform wird vermessen (3D)…','Sonnenlage wird berechnet…','Ihre Anlage wird geplant…'],
+        status: { eligible: 'Gut geeignet, noch keine Module erkannt', has_panels: 'Hier sind schon Module installiert', obstructed: 'Dach ist zu stark verbaut', too_small: 'Dachfläche zu klein' },
+        fallbackNote: 'Hausnummer nicht in OpenStreetMap erfasst, nächstgelegene erfasste Adresse verwendet.',
+        exampleNote: 'Zum Schutz der Eigentümer zeigen wir bei Beispielobjekten keine Adresse und keine Links an. Suchen Sie eine Adresse selbst, sehen Sie Ihr Ergebnis vollständig.',
+        privacyNote: 'Ihr Ergebnis ist privat. Es wird nicht veröffentlicht und läuft nach wenigen Stunden automatisch ab.',
+        payback: 'Amortisation', estBadge: 'unverbindliche Schätzung', years: 'Jahre',
+        mSystem: 'Anlage', modules: 'Module', mArea: 'Modulfläche', mOrient: 'Ausrichtung · Sonnenertrag (PVGIS)',
+        mKwh: 'Stromertrag pro Jahr', mInvest: 'Investition (schlüsselfertig, 0 % USt.)',
+        mBenefit: 'Jährlicher Vorteil', mCo2: 'CO₂-Einsparung', co2unit: 't/Jahr',
+        leadH: 'Lust auf ein konkretes Angebot?',
+        leadP: 'Unser Meisterbetrieb in Ihrer Region prüft Ihr Dach vor Ort und erstellt Ihnen ein unverbindliches Angebot, ganz ohne Verpflichtung.',
+        leadPh: 'Ihre E-Mail-Adresse', leadBtn: 'Angebot anfordern',
+        leadDemoNote: 'In der Demo deaktiviert: es werden keine E-Mail-Adressen erfasst und keine Nachrichten versendet. Im Produktivbetrieb stünde hier die Einwilligung zur Kontaktaufnahme.',
+        hasPanels1: 'Gute Nachricht: auf diesem Dach sind offenbar schon Solarmodule installiert (ungefähr', hasPanels2: '% der Fläche).',
+        obstructedMsg: 'Dieses Dach ist durch Aufbauten wie Technik, Terrassen oder Gauben so belegt, dass keine sinnvolle Fläche für Module frei bleibt.',
+        t3d: '3D-Modell', tFoto: 'Luftbild', tLetter: 'Anschreiben',
+        fineprint: 'Alle Werte sind unverbindliche, automatisch berechnete Schätzwerte und keine zugesicherten Eigenschaften. Unsere Berechnung kann vorhandene Module, Aufbauten und Verschattung übersehen oder fälschlich erkennen und Erträge über- wie unterschätzen. Luftbilder und 3D-Daten können 1 bis 3 Jahre alt sein, Abweichungen von 20 % und mehr sind möglich. 0 % USt. nur unter den Voraussetzungen des § 12 Abs. 3 UStG. Verbindlich wird es erst nach einer Prüfung vor Ort mit individuellem Angebot.',
+        footer: 'Alle Angaben sind unverbindliche, automatisch berechnete Schätzwerte (amtliche Luftbilder und 3D-Gebäudedaten, OpenStreetMap, PVGIS). Die Erkennung von Modulen und Dachaufbauten kann fehlschlagen. Verschattung durch Bäume und Nachbargebäude, Statik, Elektrik und Denkmalschutz sind nicht geprüft. Erträge basieren auf langjährigen Mittelwerten, einzelne Jahre weichen ab. Preise sind Marktdurchschnitte, EEG-Sätze Stand 06/2026. Keine Rechts-, Steuer- oder Anlageberatung. Verbindliche Aussagen gibt es erst nach einer Prüfung vor Ort.',
+      },
+      en: {
+        tagline: 'real-time roof analysis', modeOwner: 'For homeowners', modePartner: 'Demand cockpit (internal)',
+        h1a: 'What can', h1b: 'your roof do?',
+        sub: 'Just type your address. We inspect your roof on official aerial imagery, plan a suitable solar system and calculate what it earns you. Free, non-binding, in under a minute. Addresses are German.',
+        searchPh: 'e.g. Str. vor Schönholz 14, 13158 Berlin', btnCheck: 'Check my roof',
+        hint: 'Or try an example:', noimg: 'no image',
+        builtFor: 'Built for the team at',
+        stages: ['Finding the address…','Loading the building…','Fetching aerial imagery…','Inspecting the roof…','Measuring the roof shape (3D)…','Calculating sun exposure…','Planning your system…'],
+        status: { eligible: 'Well suited, no existing modules detected', has_panels: 'Modules already installed here', obstructed: 'Roof too obstructed', too_small: 'Roof area too small' },
+        fallbackNote: 'House number not recorded in OpenStreetMap, nearest recorded address used.',
+        exampleNote: 'To protect the owners we hide the address and links for example properties. Search an address yourself and you will see the full result.',
+        privacyNote: 'Your result is private. It is never published and expires automatically after a few hours.',
+        payback: 'Payback', estBadge: 'non-binding estimate', years: 'years',
+        mSystem: 'System', modules: 'modules', mArea: 'Module area', mOrient: 'Orientation · solar yield (PVGIS)',
+        mKwh: 'Electricity per year', mInvest: 'Investment (turnkey, 0% German VAT)',
+        mBenefit: 'Benefit per year', mCo2: 'CO₂ savings', co2unit: 't per year',
+        leadH: 'Want a real quote?',
+        leadP: 'Our local installation team surveys your roof on site and prepares a non-binding quote, with no obligation at all.',
+        leadPh: 'Your e-mail address', leadBtn: 'Request a quote',
+        leadDemoNote: 'Disabled in the demo: no e-mail addresses are collected and nothing is sent. In production this is where the contact consent would live.',
+        hasPanels1: 'Good news: this roof already appears to have solar modules installed (about', hasPanels2: '% of the area).',
+        obstructedMsg: 'This roof is so occupied by superstructures such as equipment, terraces or dormers that no sensible module area remains.',
+        t3d: '3D model', tFoto: 'Aerial photo', tLetter: 'Letter',
+        fineprint: 'All values are non-binding, automatically calculated estimates, not warranted characteristics. Our analysis can miss or falsely detect existing modules, superstructures and shading, and can over- or underestimate yields. Imagery and 3D data can be 1 to 3 years old; deviations of 20% and more are possible. The 0% German VAT rate applies only under the conditions of sec. 12 (3) UStG. Figures become binding only after an on-site survey with an individual quote.',
+        footer: 'All figures are non-binding automated estimates (official aerial imagery and 3D building data, OpenStreetMap, PVGIS). Detection of modules and roof structures can fail. Shading from trees and neighbouring buildings, structural, electrical and heritage aspects are not checked. Yields are long-term averages; individual years differ. Prices are market averages, German feed-in tariffs as of 06/2026. No legal, tax or investment advice. Binding statements require an on-site survey.',
+      },
+    },
+    timer: null, clock: null,
+    sheet: null, sheetToken: '', sheetTab: '3d',
+    detail: null, dtab: '3d',
+  }),
+  computed: {
+    T() { return this.I18N[this.lang]; },
+    letterRel() {
+      if (!this.sheet) return '';
+      return this.lang === 'de' ? this.sheet.letter
+                                : (this.sheet.letter_en || this.sheet.letter);
+    },
+    filtered() {
+      const q = this.q.toLowerCase(), asc = this.sortKey === 'payback_years';
+      return this.rows
+        .filter(r => (!this.status || r.status === this.status)
+          && (!this.segment || r.segment === this.segment)
+          && (!q || (r.address + ' ' + r.business_name).toLowerCase().includes(q)))
+        .sort((a, b) => asc ? a[this.sortKey] - b[this.sortKey]
+                            : b[this.sortKey] - a[this.sortKey]);
+    },
+    stats() {
+      const el = this.filtered.filter(r => r.status === 'eligible');
+      return { n: el.length + ' / ' + this.filtered.length,
+        kwp: el.reduce((s, r) => s + r.proposed_kwp, 0),
+        cost: el.reduce((s, r) => s + r.estimated_cost_eur, 0),
+        kwh: el.reduce((s, r) => s + r.estimated_annual_kwh, 0) };
+    },
+    detailRows() {
+      const r = this.detail; if (!r) return [];
+      const de = this.de;
+      return [
+        ['Status', r.status === 'eligible' ? 'geeignet' : r.status === 'has_panels' ? 'belegt' : 'zu klein'],
+        ['Gebäude', r.building_type + (r.segment === 'b2b' ? ' · B2B' : '')],
+        ['Grundfläche', de(r.footprint_m2) + ' m²'],
+        ['Module', de(r.proposed_panels) + ' · ' + de(r.proposed_kwp, 1) + ' kWp'],
+        ['Modulfläche', de(r.proposed_panel_area_m2) + ' m²'],
+        ['Ausrichtung', r.orientation || '–'],
+        ['Ertrag (PVGIS)', de(r.specific_yield) + ' kWh/kWp·a'],
+        ['Stromertrag', de(r.estimated_annual_kwh) + ' kWh/a'],
+        ['Investition', de(r.estimated_cost_eur) + ' €'],
+        ['Vorteil / Jahr', de(r.annual_benefit_eur) + ' €'],
+        ['CO₂', de(r.co2_t_per_year, 1) + ' t/a'],
+        ['Detektor', r.detector],
+        ['Kontakt', [r.contact_email, r.contact_phone].filter(Boolean).join(' · ') || '–'],
+        ['Links', `<a href="${r.osm_url}" target="_blank">OSM</a>` +
+          (r.letter ? ` · <a href="${this.fileUrl(this.run, r.letter)}" target="_blank">Brief</a>` : '')],
+      ];
+    },
+  },
+  methods: {
+    de(n, d = 0) { return Number(n || 0).toLocaleString(
+      this.lang === 'de' ? 'de-DE' : 'en-US',
+      { maximumFractionDigits: d, minimumFractionDigits: 0 }); },
+    setLang(l) { this.lang = l; localStorage.setItem('ss_lang', l); },
+    shortAddr(a) { return (a || '').split(', Deutschland')[0].split(', Berlin,')[0]
+      .split(',').slice(0, 3).join(', '); },
+    fileUrl(run, p) { return `/files/${run}/${p}`; },
+    privateUrl(p) { return `/private/${this.sheetToken}/${p}`; },
+    async loadRuns(keep) {
+      this.runs = await (await fetch('/api/runs')).json();
+      if (!keep && this.runs.length && !this.run) this.run = this.runs[0].name;
+      if (this.run) await this.loadRun();
+    },
+    async loadRun() {
+      this.rows = this.run
+        ? await (await fetch(`/api/runs/${this.run}/results`)).json() : [];
+    },
+    openDetail(r) { this.detail = r; this.dtab = r.viewer ? '3d' : 'foto'; },
+    onAddrInput() {
+      clearTimeout(this.sugTimer);
+      const q = this.address.trim();
+      if (q.length < 3) { this.suggs = []; this.sugIdx = -1; return; }
+      this.sugTimer = setTimeout(async () => {
+        try {
+          const r = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`);
+          this.suggs = await r.json(); this.sugIdx = -1;
+        } catch { this.suggs = []; }
+      }, 220);
+    },
+    moveSug(d) {
+      if (!this.suggs.length) return;
+      this.sugIdx = (this.sugIdx + d + this.suggs.length) % this.suggs.length;
+    },
+    pickSug(s) {
+      this.address = s.value; this.suggs = []; this.sugIdx = -1;
+      if (s.address) this.analyze();      // exact house -> go
+    },
+    blurSug() { setTimeout(() => { this.suggs = []; }, 150); },
+    submitSearch() {
+      if (this.sugIdx >= 0 && this.suggs[this.sugIdx]) this.pickSug(this.suggs[this.sugIdx]);
+      else { this.suggs = []; this.analyze(); }
+    },
+    runExample(ex) {
+      this.address = '';
+      const prefix = this.lang === 'de' ? 'Beispielobjekt: ' : 'Example property: ';
+      this.analyze(ex.addr, prefix + (ex[this.lang] || ex.de));
+    },
+    async analyze(addrOverride, label) {
+      const q = (typeof addrOverride === 'string' && addrOverride) || this.address;
+      if (!q.trim() || this.analyzing) return;
+      this.analyzing = true; this.logErr = ''; this.sheet = null;
+      this.stage = 0; this.secs = 0;
+      this.timer = setInterval(() => {
+        if (this.stage < this.T.stages.length - 1) this.stage++; }, 4200);
+      this.clock = setInterval(() => this.secs++, 1000);
+      try {
+        const url = `/api/analyze?address=${encodeURIComponent(q)}`
+          + (label ? `&label=${encodeURIComponent(label)}` : '');
+        const res = await fetch(url);
+        if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+        const { token, row, note, example } = await res.json();
+        this.note = note || ''; this.isExample = !!example;
+        this.stage = this.T.stages.length - 1;
+        this.sheet = row; this.sheetToken = token;
+        this.sheetTab = row.viewer ? '3d' : 'foto';
+        setTimeout(() => document.getElementById('sheet')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+      } catch (e) { this.logErr = e.message; }
+      clearInterval(this.timer); clearInterval(this.clock);
+      this.analyzing = false;
+    },
+  },
+  async mounted() {
+    try {
+      this.brand = await (await fetch('/api/branding')).json();
+      if (this.brand.chip_addr) this.examples.push({
+        icon: '✦', de: this.brand.chip_de || this.brand.chip_addr,
+        en: this.brand.chip_en || this.brand.chip_de || this.brand.chip_addr,
+        addr: this.brand.chip_addr });
+    } catch {}
+    this.loadRuns();
+    addEventListener('keydown', e => { if (e.key === 'Escape') this.detail = null; });
+  },
+}).mount('#app');
+</script>
+</body>
+</html>

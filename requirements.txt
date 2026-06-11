@@ -1,0 +1,9 @@
+requests>=2.31
+numpy>=1.26
+opencv-python-headless>=4.9
+shapely>=2.0
+pyproj>=3.6
+fastapi>=0.110
+uvicorn>=0.29
+ultralytics>=8.2
+huggingface_hub>=0.23

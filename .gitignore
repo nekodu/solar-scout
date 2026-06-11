@@ -1,0 +1,24 @@
+# Secrets — NEVER commit
+.env
+.oci/
+*.pem
+
+# Runtime data / state
+market.db
+private/
+out*/
+.vm-ready
+*.log
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+*.swp
+
+# personal infra automation (contains real OCIDs / account identifiers)
+scripts/oci-acquire.sh
+scripts/setup-vm.sh

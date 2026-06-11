@@ -1,0 +1,34 @@
+services:
+  solarscout:
+    build: .
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true     # block setuid privilege escalation
+    cap_drop:
+      - ALL                        # the app needs no Linux capabilities
+    environment:
+      PARTNER_NAME: "1KOMMA5°"
+      PARTNER_CITY: "Berlin"
+      PARTNER_SUBURB: "Pankow"
+      PARTNER_CHIP_ADDR: "Zirkusweg 2, 20359 Hamburg"
+      PARTNER_CHIP_DE: "Euer Astraturm in Hamburg (Härtetest)"
+      PARTNER_CHIP_EN: "Your Astraturm in Hamburg (stress test)"
+    volumes:
+      - solarscout-data:/data        # market.db + private results
+      - solarscout-cache:/cache      # LoD2 tiles (up to a few hundred MB)
+    # no ports exposed: cloudflared reaches it over the compose network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    command: tunnel run --token ${CF_TUNNEL_TOKEN} --url http://solarscout:8080
+    depends_on:
+      - solarscout
+
+volumes:
+  solarscout-data:
+  solarscout-cache:
