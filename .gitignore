@@ -22,3 +22,11 @@ __pycache__/
 # personal infra automation (contains real OCIDs / account identifiers)
 scripts/oci-acquire.sh
 scripts/setup-vm.sh
+scripts/vm-warm-deploy.sh
+scripts/oci-hunt-loop.sh
+scripts/oci-supervisor.sh
+visits.jsonl
+.admin_key
+.ntfy_topic
+.oci-hunt.lock
+STATUS.md

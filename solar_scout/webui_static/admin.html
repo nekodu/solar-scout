@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>solar·scout — visitors</title>
+<style>
+ :root{--bg:#0c0a07;--panel:#181410;--line:#2c241b;--txt:#f2ece2;--mut:#9d927f;
+   --sun:#ffb524;--ok:#9fe870;--bad:#ff6b5e;--mono:'IBM Plex Mono',ui-monospace,monospace}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 system-ui,sans-serif;padding:20px}
+ h1{font-size:20px;margin:0 0 4px}h1 .s{color:var(--sun)}
+ .sub{color:var(--mut);font:12px var(--mono);margin-bottom:18px}
+ .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px}
+ .c{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+ .c b{display:block;font-size:26px;font-weight:600}.c.hot b{color:var(--sun)}.c span{font:11px var(--mono);color:var(--mut)}
+ h2{font-size:15px;margin:18px 0 8px}
+ table{width:100%;border-collapse:collapse;font:12px var(--mono)}
+ th{text-align:left;color:var(--mut);font-weight:400;padding:6px 8px;border-bottom:1px solid var(--mut)}
+ td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+ tr.eng td{background:rgba(255,181,36,.06)}
+ .tag{padding:1px 7px;border-radius:99px;font-size:10px}
+ .tag.eng{background:rgba(255,181,36,.15);color:var(--sun)}
+ .ua{color:var(--mut);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .empty{color:var(--mut);font:12px var(--mono)}
+ input{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 11px;font:12px var(--mono)}
+ button{background:var(--sun);border:none;border-radius:8px;padding:7px 14px;font-weight:600;cursor:pointer}
+</style></head>
+<body>
+<h1><span class="s">☀</span> visitors</h1>
+<div class="sub" id="meta">enter key to load</div>
+<div id="gate"><input id="key" type="password" placeholder="admin key" autocomplete="off">
+  <button onclick="load()">view</button></div>
+
+<div id="dash" style="display:none">
+  <div class="cards">
+    <div class="c hot"><b id="k_eng">–</b><span>engaged (used the tool)</span></div>
+    <div class="c"><b id="k_uh">–</b><span>unique humans</span></div>
+    <div class="c"><b id="k_hh">–</b><span>human hits</span></div>
+    <div class="c"><b id="k_bot">–</b><span>bots</span></div>
+    <div class="c"><b id="k_scan">–</b><span>scanners</span></div>
+  </div>
+
+  <h2>🔥 Engaged — likely real people (incl. HR)</h2>
+  <table><thead><tr><th>when</th><th>where</th><th>did</th><th>from</th><th>browser</th></tr></thead>
+    <tbody id="eng"></tbody></table>
+  <div class="empty" id="eng_empty" style="display:none">No engaged visits yet in this window.</div>
+
+  <h2>Recent human visitors (unique)</h2>
+  <table><thead><tr><th>when</th><th>where</th><th>page</th><th>from</th><th>browser</th></tr></thead>
+    <tbody id="hum"></tbody></table>
+  <div class="empty" id="hum_empty" style="display:none">No human visitors yet in this window.</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+function ago(ts){const m=Math.round((Date.now()/1000-ts)/60);
+  return m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago';}
+function ref(r){if(!r)return'direct';try{return new URL(r).hostname}catch{return r.slice(0,30)}}
+async function load(){
+  const key=$('#key').value.trim();if(!key)return;
+  localStorage.setItem('ss_admin_key',key);
+  const r=await fetch('/admin/visits?key='+encodeURIComponent(key)+'&hours=72');
+  if(!r.ok){$('#meta').textContent='wrong key';return;}
+  const d=await r.json();
+  $('#gate').style.display='none';$('#dash').style.display='';
+  $('#meta').textContent='last '+d.window_h+'h · auto-refresh 30s';
+  k_eng.textContent=d.engaged_hits;k_uh.textContent=d.unique_humans;
+  k_hh.textContent=d.human_hits;k_bot.textContent=d.bot_hits;k_scan.textContent=d.scanner_hits;
+  eng.innerHTML=d.recent_engaged.map(e=>`<tr class="eng"><td>${ago(e.ts)}</td>
+    <td>${e.cc||'??'} · ${e.ip}</td><td><span class="tag eng">${e.path}</span></td>
+    <td>${ref(e.ref)}</td><td class="ua">${e.ua}</td></tr>`).join('');
+  $('#eng_empty').style.display=d.recent_engaged.length?'none':'';
+  hum.innerHTML=d.recent_humans.map(e=>`<tr><td>${ago(e.ts)}</td>
+    <td>${e.cc||'??'} · ${e.ip}</td><td>${e.path}</td><td>${ref(e.ref)}</td>
+    <td class="ua">${e.ua}</td></tr>`).join('');
+  $('#hum_empty').style.display=d.recent_humans.length?'none':'';
+}
+const saved=localStorage.getItem('ss_admin_key');if(saved){$('#key').value=saved;load();}
+setInterval(()=>{if($('#dash').style.display!=='none')load();},30000);
+$('#key').addEventListener('keydown',e=>{if(e.key==='Enter')load();});
+</script>
+</body></html>

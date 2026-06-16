@@ -25,7 +25,7 @@ from fastapi.responses import FileResponse
 from pyproj import Transformer
 from shapely.ops import transform as shp_transform
 
-from . import buildings, geo, imagery, market, pipeline
+from . import buildings, geo, imagery, market, pipeline, visitors
 
 STATIC_DIR = Path(__file__).parent / "webui_static"
 # On-demand address analyses are PRIVATE and EPHEMERAL: each lives in an
@@ -50,6 +50,39 @@ NUMERIC = {
 
 def create_app(base: Path) -> FastAPI:
     app = FastAPI(title="solar-scout results")
+
+    # ---- visitor tracking (catch real humans / HR vs the bot noise) ----
+    ADMIN_KEY = os.environ.get("ADMIN_KEY") or "stats"
+    tracker = visitors.Tracker(base, ntfy_topic=os.environ.get("NTFY_TOPIC", ""),
+                               ntfy_server=os.environ.get("NTFY_SERVER", "https://ntfy.sh"))
+
+    block_bots = os.environ.get("BLOCK_BOTS", "1") != "0"
+
+    @app.middleware("http")
+    async def _track(request: Request, call_next):
+        try:
+            ip = request.headers.get("cf-connecting-ip") or (
+                request.client.host if request.client else "?")
+            should_block = tracker.handle(
+                ip, request.headers.get("cf-ipcountry", ""),
+                request.headers.get("user-agent", ""),
+                request.url.path, request.headers.get("referer", ""))
+            if block_bots and should_block:
+                from fastapi.responses import PlainTextResponse
+                return PlainTextResponse("Not available.", status_code=403)
+        except Exception:
+            pass
+        return await call_next(request)
+
+    @app.get("/admin/visits")
+    def admin_visits(key: str = "", hours: int = 48):
+        if key != ADMIN_KEY:
+            raise HTTPException(403, "forbidden")
+        return tracker.stats(hours)
+
+    @app.get("/admin")
+    def admin_page():
+        return FileResponse(STATIC_DIR / "admin.html")
 
     def run_dir(run: str) -> Path:
         d = (base / run).resolve()
