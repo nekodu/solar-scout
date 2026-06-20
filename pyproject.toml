@@ -1,0 +1,19 @@
+[project]
+name = "solar-scout"
+version = "0.1.0"
+description = "Screen German roofs for solar potential from open geodata."
+readme = "README.md"
+requires-python = ">=3.12"
+
+# Tooling config lives here too, so every tool reads one file.
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+# Start small: pyflakes (F), pycodestyle errors (E), import sorting (I).
+# We will widen this set in a later lesson.
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

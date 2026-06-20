@@ -1,0 +1,21 @@
+# Dev / CI dependencies.
+#
+# Deliberately WITHOUT ultralytics + torch: solar_scout.ml_detect lazy-loads
+# the ML model inside load_model(), so importing the package, running the CLI
+# (`python -m solar_scout --help`) and the unit tests never need torch. Keeping
+# them out makes CI install in seconds instead of minutes. The full ML stack is
+# validated separately in the Docker build job.
+#
+# (Light runtime subset mirrors requirements.txt; if that file changes, update
+#  this one too.)
+requests>=2.31
+numpy>=1.26
+opencv-python-headless>=4.9
+shapely>=2.0
+pyproj>=3.6
+fastapi>=0.110
+uvicorn>=0.29
+
+# dev tools
+ruff>=0.5
+pytest>=8.0
