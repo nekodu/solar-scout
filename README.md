@@ -6,15 +6,14 @@ built end-to-end as a portfolio piece — a homeowner-facing roof check plus an
 internal "demand cockpit" for a solar company's operations team.
 
 <p align="center">
-  <a href="https://1komma5.th3cyberworld.com">
+  <a href="https://solarscout.th3cyberworld.com">
     <img src="https://img.shields.io/badge/▶%20View%20Live%20Demo-f59e0b?style=for-the-badge&labelColor=1c1303" alt="View the live demo">
   </a>
 </p>
 
 > Containerised and served via a Cloudflare Tunnel (rootless Docker, non-root
-> container, capabilities dropped). The demo is branded for
-> [1KOMMA5°](https://1komma5.com) as an example recipient; the branding is a
-> single environment variable.
+> container, capabilities dropped). The demo can be branded for any solar
+> company through a single environment variable.
 
 ![Roof analysis result with interactive 3D model](docs/img/hero-result-3d.png)
 
@@ -110,5 +109,6 @@ public APIs).
 
 Imagery © the German state surveying authorities (various open licences) ·
 Footprints © OpenStreetMap contributors (ODbL) · Irradiance: PVGIS © European
-Union · Detector model MIT (finloop). Not affiliated with or endorsed by
-1KOMMA5°; their name is used only as an example deployment target.
+Union · Detector model MIT (finloop). The demo brand name is configurable and
+defaults to a generic placeholder; it is not affiliated with or endorsed by any
+named company.

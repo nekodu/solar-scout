@@ -19,6 +19,10 @@ __pycache__/
 .DS_Store
 *.swp
 
+# Claude Code — local project notes, never commit
+CLAUDE.md
+.claude/
+
 # personal infra automation (contains real OCIDs / account identifiers)
 scripts/oci-acquire.sh
 scripts/setup-vm.sh

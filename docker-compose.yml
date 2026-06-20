@@ -9,12 +9,12 @@ services:
     environment:
       ADMIN_KEY: "${ADMIN_KEY}"
       NTFY_TOPIC: "${NTFY_TOPIC}"
-      PARTNER_NAME: "1KOMMA5°"
+      PARTNER_NAME: "SolarScout"
       PARTNER_CITY: "Berlin"
       PARTNER_SUBURB: "Pankow"
-      PARTNER_CHIP_ADDR: "Zirkusweg 2, 20359 Hamburg"
-      PARTNER_CHIP_DE: "Euer Astraturm in Hamburg (Härtetest)"
-      PARTNER_CHIP_EN: "Your Astraturm in Hamburg (stress test)"
+      PARTNER_CHIP_ADDR: ""
+      PARTNER_CHIP_DE: ""
+      PARTNER_CHIP_EN: ""
     volumes:
       - solarscout-data:/data        # market.db + private results
       - solarscout-cache:/cache      # LoD2 tiles (up to a few hundred MB)

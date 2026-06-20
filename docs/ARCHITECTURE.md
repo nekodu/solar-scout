@@ -102,13 +102,13 @@ generated letter.
 execute JavaScript. The mailable artifact is the static render inside a printable
 letter (or its PDF); the 3D page is an attachment/link for follow-up conversations.
 
-## Demo: in-house tool concept (prepared for 1KOMMA5)
+## Demo: in-house tool concept
 
 - **Customer side** (`/`): anyone searches their address, gets a real-time
   roof analysis and a private result sheet, and can request a quote
   (first-party: the data stays with the operating company; GDPR-clean opt-in).
-- **Internal side** (`/partner`, "Demand-Cockpit"): the ops view a company
-  like 1KOMMA5 would use. Branch (Standort) region picker, weekly activity,
+- **Internal side** (`/partner`, "Demand-Cockpit"): the ops view a solar
+  company would use. Branch (Standort) region picker, weekly activity,
   KPI chips, funnel (roof checks -> suitable roofs -> quote requests),
   consented requests routed to the local Meisterbetrieb, a region comparison
   (where demand grows, conversion per district) and integration hooks

@@ -37,7 +37,7 @@ tunnel** (Cloudflared type). Name it `solarscout`. Copy the token from the
 "install connector" command - everything after `--token`.
 
 Add a **Public Hostname** to the tunnel:
-- Subdomain: `1komma5` (personal touch) or `demo`, Domain: `th3cyberworld.*`
+- Subdomain: `solarscout` or `demo`, Domain: `th3cyberworld.*`
 - Service: `HTTP` -> `solarscout:8080`   (the compose service name)
 
 ### 3. Launch
@@ -51,7 +51,7 @@ docker compose exec solarscout python -m solar_scout.demo_seed --db /data/market
 
 https://demo.th3cyberworld.* is live as soon as the tunnel connects.
 
-### 4. Restrict access to the 1KOMMA5 reviewers (recommended)
+### 4. Restrict access to named reviewers (optional)
 
 Cloudflare **Zero Trust -> Access -> Applications -> Add an application**
 (Self-hosted): application domain `demo.th3cyberworld.*`, then a policy
@@ -165,12 +165,12 @@ Dockerfile to a Space and it just runs. Downsides: public hf.space URL only
 ## Per-recipient branding
 
 The demo personalizes itself from environment variables (set in
-docker-compose.yml, already filled in for 1KOMMA5):
+docker-compose.yml; defaults to a generic `SolarScout` brand):
 
 - PARTNER_NAME: greeting pill on the landing page and partner-portal persona
 - PARTNER_CITY / PARTNER_SUBURB: the portal's default home region
-- PARTNER_CHIP_ADDR / _DE / _EN: an extra example chip, e.g. the recipient's
-  own building (the Astraturm comes back "obstructed": an honesty easter egg)
+- PARTNER_CHIP_ADDR / _DE / _EN: an optional extra example chip, e.g. a
+  recipient's own building (leave empty to hide it)
 
 Re-brand for another company by changing the variables and
 `docker compose up -d`.
