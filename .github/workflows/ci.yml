@@ -1,0 +1,28 @@
+name: CI
+
+# WHEN this workflow runs (the "trigger"):
+on:
+  push:
+    branches: [main]          # every push to main
+  pull_request:               # and every pull request
+
+jobs:
+  smoke:                      # one job, named "smoke"
+    runs-on: ubuntu-latest    # the runner: a fresh Ubuntu VM GitHub gives us
+    steps:
+      # 1) get our code onto the runner
+      - uses: actions/checkout@v4
+
+      # 2) install Python 3.12 (matches our Dockerfile), with pip caching
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # 3) install the light dev dependencies (no torch — see requirements-dev.txt)
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      # 4) the actual check: does the CLI even load and print help?
+      - name: Smoke test — CLI loads
+        run: python -m solar_scout --help
